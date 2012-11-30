@@ -1,4 +1,5 @@
-//static filters for this page
+/* static filters for a list page
+*	Version 0.1, Nov 30th 2012, Guy Moreau 
 $(document).ready(function () {
 	/*look at URL and note if: 
 		a) filter list has changed / added / reduced
