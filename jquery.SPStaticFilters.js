@@ -1,5 +1,7 @@
 /* static filters for a list page
-*	Version 0.1, Nov 30th 2012, Guy Moreau 
+*	Version 0.2, Nov 30th 2012, Guy Moreau
+*/
+
 $(document).ready(function () {
 	/*look at URL and note if: 
 		a) filter list has changed / added / reduced
@@ -12,24 +14,40 @@ $(document).ready(function () {
 
 	function getFilterStringfromURL() {
 		// find all FilterField{n} where n is a number
-		var myRegexp = /(FilterField(\d)=.*?&FilterValue\d=.*?)(?:&|$)/ig,
+		// also find all SortField (should only have one)
+		var myRegexp = /(FilterField(\d)=.*?&FilterValue\d=.*?)(?:&|$)|(SortField=.*&SortDir=.*?)(?:&|$)/ig,
 			lString = window.location.href,
 			match = myRegexp.exec(lString),
-			lOut = [];
+			lOut = [],
+			lHasSort;
 
 		//first result - save it
 		if (match === null) { return null; }
-		lOut[match[2] - 1] = match[1];
+		//determine if match is a filter or a sort
+		//if sort, array item 1 and 2 are null
+		if (match[2] === '') {
+			lHasSort = match[3];
+		} else {
+			lOut[match[2] - 1] = match[1];
+		}
 
 		do {
 			//nth result, just keep saving
 			match = myRegexp.exec(lString);
 			$("div#samply").after("log := " + match + "<br /><hr />");
 			if (match !== null) {
-				lOut[match[2] - 1] = match[1];
+				if (match[2] === '') {
+					lHasSort = match[3];
+				} else {
+					lOut[match[2] - 1] = match[1];
+				}
 			}
 		} while (match !== null);
 
+		if (lHasSort !== null) {
+			//append to last item in list
+			lOut[lOut.length + 1] = lHasSort;
+		}
 		return lOut;
 	}
 
