@@ -12,9 +12,9 @@ Add the script to the list item you want static filters. It uses self-executing 
 
 ## Version history ##
 * 0.1: Initial Release.
-* 0.2:
-** Added Static sorting
-** Fixed a silly error in the header comment by not terminating it properly.
+* 0.2: Added Static sorting;
+	   Fixed a silly error in the header comment by not terminating it properly.
+* 0.3: Speed improvements. Put at top of file for best performance.
 
 ## Future possibilities ##
 A quick list of items that could be added in the future
