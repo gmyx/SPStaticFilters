@@ -15,7 +15,7 @@ function getFilterStringfromURL() {
 	// find all FilterField{n} where n is a number
 	// also find all SortField (should only have one)
 	// important note, SP FilterFields index is Base 1, code adjusts for that fact
-	var myRegexp = /(FilterField(\d)=.*?&FilterValue\d=.*?)(?:&|$)|(SortField=.*&SortDir=.*?)(?:&|$)/ig,
+	var myRegexp = /(FilterField(\d)=.*?&FilterValue\d=.*?)(?:&|$)|(SortField=.*?&SortDir=.*?)(?:&|$)/ig,
 		lString = window.location.href,
 		match = myRegexp.exec(lString),
 		lOut = [],
@@ -51,7 +51,13 @@ function getFilterStringfromURL() {
 
 	if (lHasSort !== null) {
 		//append sort to last item in list
-		lOut[lOut.length + 1] = lHasSort;
+		if (lOut.length === 0 && lOut[0] === undefined) {
+			//put it in 0 - only item
+			lOut[0] = lHasSort;
+		} else {
+			//add it to the last item
+			lOut[lOut.length + 1] = lHasSort;
+		}
 	}
 	return lOut;
 }
