@@ -1,5 +1,5 @@
 /* static filters for a list page
-*	Version 0.3, Nov 30th 2012, Guy Moreau
+*	Version 04, Dec 20th 2012, Guy Moreau
 */
 
 /* genereal process: look at URL and note if: 
@@ -14,6 +14,7 @@
 function getFilterStringfromURL() {
 	// find all FilterField{n} where n is a number
 	// also find all SortField (should only have one)
+	// important note, SP FilterFields index is Base 1, code adjusts for that fact
 	var myRegexp = /(FilterField(\d)=.*?&FilterValue\d=.*?)(?:&|$)|(SortField=.*&SortDir=.*?)(?:&|$)/ig,
 		lString = window.location.href,
 		match = myRegexp.exec(lString),
@@ -25,26 +26,31 @@ function getFilterStringfromURL() {
 	//determine if match is a filter or a sort
 	//if sort, array item 1 and 2 are null
 	if (match[2] === '') {
+		//does have a sort - it's in the 3rd capture group
 		lHasSort = match[3];
 	} else {
+		//save the URl fragment for this filter item, accounting for Base 1
 		lOut[match[2] - 1] = match[1];
 	}
 
 	do {
 		//nth result, just keep saving
 		match = myRegexp.exec(lString);
-		$("div#samply").after("log := " + match + "<br /><hr />");
+
 		if (match !== null) {
+			//test for empty capture group 2 - that will mean it's a sort
 			if (match[2] === '') {
+				//is a sort so wave that part
 				lHasSort = match[3];
 			} else {
+				//save the URl fragment for this filter item, accounting for Base 1
 				lOut[match[2] - 1] = match[1];
 			}
 		}
 	} while (match !== null);
 
 	if (lHasSort !== null) {
-		//append to last item in list
+		//append sort to last item in list
 		lOut[lOut.length + 1] = lHasSort;
 	}
 	return lOut;
@@ -66,8 +72,13 @@ function saveFilterStrings() {
 
 	if (lCookieCount !== null) {
 		if (lOldURL.indexOf("FilterClear=1") !== -1) {
-			//clear out cookies
-			$.removeCookie('FieldCount');
+			//check to see if sort is active - otherwise safe to delete
+			if (lOldURL.indexOf("SortField=") !== -1) {
+				saveFilterStrings();
+			} else {
+				//clear out cookies
+				$.removeCookie('FieldCount');
+			}
 		} else if (lCookieCount >= 0 && lData !== null) {
 			//save changes
 			saveFilterStrings();
