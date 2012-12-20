@@ -15,13 +15,16 @@ Add the script to the list item you want static filters. It uses self-executing 
 * 0.2: Added Static sorting;
 	   Fixed a silly error in the header comment by not terminating it properly.
 * 0.3: Speed improvements. Put at top of file for best performance.
+* 0.4: Fixed an issue with Sort and FilterClear
 
 ## Future possibilities ##
 A quick list of items that could be added in the future
-* Static Sorting
 * Create defaults to enable / disable features
 ** including default lenght of cookies, currently 10 years
 * obfucation of cookies (currenlty stored in plain text)
+
+## Known Issues ##
+* Cannot delete a sort once created.
 
 ## Tested conditions ##
 The script was tested using the following scenario:
