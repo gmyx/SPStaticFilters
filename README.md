@@ -16,6 +16,7 @@ Add the script to the list item you want static filters. It uses self-executing 
 	   Fixed a silly error in the header comment by not terminating it properly.
 * 0.3: Speed improvements. Put at top of file for best performance.
 * 0.4: Fixed an issue with Sort and FilterClear
+* 0.5: Bug fixes and added the ability to stop sorting
 
 ## Future possibilities ##
 A quick list of items that could be added in the future
@@ -24,7 +25,7 @@ A quick list of items that could be added in the future
 * obfucation of cookies (currenlty stored in plain text)
 
 ## Known Issues ##
-* Cannot delete a sort once created.
+* None
 
 ## Tested conditions ##
 The script was tested using the following scenario:

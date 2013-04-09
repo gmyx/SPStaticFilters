@@ -1,5 +1,5 @@
 /* static filters for a list page
-*	Version 04, Dec 20th 2012, Guy Moreau
+*	Version 05, Apr 5th 2013, Guy Moreau
 */
 
 /* genereal process: look at URL and note if: 
@@ -10,6 +10,29 @@
 	c) filer is empty
 		-> check cookie, reload with filters if nessesary
 */
+
+
+'use strict';
+var mPrefs_SPStaticFilters,
+// jCanvasCards default property values
+	SPStaticFilters_defaults = {
+		text: "Stop Sorting",
+		icon: scriptPath() + "/NOTSORTAZLang.png",
+	};
+
+function scriptPath() {
+	var path = '';
+
+	$("script").each(function () {
+		if (this.src !== "") {
+			if (this.src.match(/jquery\.SPStaticFilters.*\.js/)) {
+				path = this.src.replace(/(.*)jquery\.SPStaticFilters.*\.js/, '$1');
+			}
+		}
+	});
+
+	return path;
+};
 
 function getFilterStringfromURL() {
 	// find all FilterField{n} where n is a number
@@ -32,7 +55,7 @@ function getFilterStringfromURL() {
 		//save the URl fragment for this filter item, accounting for Base 1
 		lOut[match[2] - 1] = match[1];
 	}
-
+	
 	do {
 		//nth result, just keep saving
 		match = myRegexp.exec(lString);
@@ -49,14 +72,14 @@ function getFilterStringfromURL() {
 		}
 	} while (match !== null);
 
-	if (lHasSort !== null) {
+	if (lHasSort !== undefined) {
 		//append sort to last item in list
 		if (lOut.length === 0 && lOut[0] === undefined) {
 			//put it in 0 - only item
 			lOut[0] = lHasSort;
 		} else {
 			//add it to the last item
-			lOut[lOut.length + 1] = lHasSort;
+			lOut[lOut.length] = lHasSort;
 		}
 	}
 	return lOut;
@@ -70,7 +93,7 @@ function saveFilterStrings() {
 		$.cookie('Filter' + i, lData[i], { expires: 3650 });
 	}
 }
-
+	
 (function () {
 	var i, lsNewURL = "", lCookieCount = $.cookie('FieldCount'),
 		lData = getFilterStringfromURL(),
@@ -115,3 +138,61 @@ function saveFilterStrings() {
 		saveFilterStrings();
 	}
 }());
+
+//sp hack to add stop sorting to menu
+_spBodyOnLoadFunctionNames.push("spStaticFilters_doHack");
+
+
+function spStaticFilters_doHack() {
+	var aRep = addSortMenuItems; //this is the SP function that creates the sort menu on the fly
+
+	addSortMenuItems = function(b, a) {
+		var lMatchSPCode, lMatchURL,
+			lSPCode = /SortField=(.*?)\\u0026/g,
+			lURLCode = /SortField=(.*?)&/g,
+			opts = $.extend({}, SPStaticFilters_defaults, mPrefs_SPStaticFilters);;
+
+		aRep(b, a);
+
+		//determine if current field is sorted
+		lMatchSPCode= lSPCode.exec(b.innerHTML);
+		lMatchURL = lURLCode.exec(window.location.href);
+
+		if (lMatchURL === null) {
+			CAMOptFilter(b, a, opts.text, "$spStaticFilters_doDeleteSort();", opts.icon, false, "stopSorting");
+		} else {
+			if (lMatchSPCode[1] === lMatchURL[1]) {
+				CAMOptFilter(b, a, opts.text, "spStaticFilters_doDeleteSort();", opts.icon, true, "stopSorting");
+			} else {
+				CAMOptFilter(b, a, opts.text, "spStaticFilters_doDeleteSort();", opts.icon, false, "stopSorting");
+			}
+		}
+	}
+};
+
+function spStaticFilters_doDeleteSort() {
+	//reload page free of sorting, clearing it from cookie
+	
+	//step 1: determine if any filters exists, if yes keep them
+	var lStrings = getFilterStringfromURL(), i, lsNewURL = "";
+
+	if (lStrings.length === 1) {
+		//only sort - kill cookie
+		$.removeCookie('FieldCount');
+		
+		//reload without sort
+		window.location.replace(window.location.href.replace(/(.*)\?.*/, '$1'));
+	} else {
+		//also has filter, delete last item and update
+		for (i = 0; i < lStrings.length - 1; i += 1) {
+			if (i > 0) {
+				//add delimter between items
+				lsNewURL += "&";
+			}
+			lsNewURL += $.cookie('Filter' + i);
+		}
+
+		//reload with the rebuilt URL
+		window.location.replace(window.location.href.replace(/(.*)\?.*/, '$1') + "?" + lsNewURL);
+	}
+}
